@@ -1,0 +1,26 @@
+diff --git a/src/lerobot/cameras/zmq/camera_zmq.py b/src/lerobot/cameras/zmq/camera_zmq.py
+index cd32a117..dbd0db89 100644
+--- a/src/lerobot/cameras/zmq/camera_zmq.py
++++ b/src/lerobot/cameras/zmq/camera_zmq.py
+@@ -211,6 +211,8 @@ class ZMQCamera(Camera):
+         if frame is None:
+             raise RuntimeError(f"{self} failed to decode image")
+ 
++        if self.color_mode == ColorMode.RGB:
++            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+         return frame
+ 
+     @check_if_not_connected
+diff --git a/src/lerobot/utils/rerun_visualization.py b/src/lerobot/utils/rerun_visualization.py
+index b7f0ccee..643515c6 100644
+--- a/src/lerobot/utils/rerun_visualization.py
++++ b/src/lerobot/utils/rerun_visualization.py
+@@ -171,7 +171,7 @@ def log_rerun_data(
+                         )
+                     else:
+                         img_entity = rr.Image(arr).compress() if compress_images else rr.Image(arr)
+-                    rr.log(key, entity=img_entity, static=True)
++                    rr.log(key, img_entity)
+                     image_paths.add(key)
+ 
+     if action:

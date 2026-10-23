@@ -1,0 +1,7 @@
+# physical-ai-studio/application/docker/ 에 두면 docker compose 가 자동으로 함께 읽는다.
+# USB 핫플러그: 컨테이너가 켜진 "뒤에" 꽂은(또는 다시 꽂은) 로봇 팔 · 카메라도 보이도록
+# WSL 의 /dev 를 컨테이너와 통째로 공유한다. (기본 설정은 컨테이너 시작 시점의 /dev 만 보임)
+services:
+  physical-ai-studio-cuda:
+    volumes:
+      - /dev:/dev

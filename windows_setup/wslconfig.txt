@@ -1,0 +1,7 @@
+# 이 파일을  C:\Users\<사용자>\.wslconfig  로 저장 (확장자 없음)
+# 적용:  PowerShell 에서  wsl --shutdown  후 Ubuntu 다시 열기
+# 강의실 PC (RAM 16GB) 기준 — 기본값(호스트의 50% = 8GB)으로는 Docker + 훈련 시 메모리 부족
+
+[wsl2]
+memory=10GB          # WSL(+Docker Desktop)이 쓸 최대 RAM. Windows 쪽에 6GB 남김
+swap=12GB            # RAM 부족 시 디스크 스왑 (훈련/영상 인코딩 중 OOM 방지)
