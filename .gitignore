@@ -22,6 +22,8 @@ checkpoints/
 *.onnx
 *.parquet
 *.mp4
+*.mov
+*.MOV
 *.rrd
 *.zip
 *.tar
