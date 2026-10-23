@@ -1,15 +1,11 @@
-"""Windows camera endpoint in either WSL NAT or mirrored networking."""
-import subprocess
+"""Compatibility entry point; implementation: intel7_vla.common.camera_address."""
+import importlib
+from pathlib import Path
+import runpy
+import sys
 
-
-def camera_host():
-    try:
-        mode = subprocess.check_output(['wslinfo','--networking-mode'],text=True,stderr=subprocess.DEVNULL).strip()
-    except (OSError,subprocess.CalledProcessError):
-        mode = 'nat'
-    if mode == 'mirrored':
-        return '127.0.0.1'
-    return subprocess.check_output(['ip','route','show','default'],text=True).split()[2]
-
-
-if __name__=='__main__': print(camera_host())
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'src'))
+if __name__ == '__main__':
+    runpy.run_module('intel7_vla.common.camera_address', run_name='__main__')
+else:
+    sys.modules[__name__] = importlib.import_module('intel7_vla.common.camera_address')

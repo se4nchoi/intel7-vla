@@ -12,8 +12,8 @@ __pycache__/
 *.pem
 *.key
 .cache/
-data/
-datasets/
+/data/
+/datasets/
 outputs/
 checkpoints/
 *.safetensors
@@ -45,3 +45,11 @@ performance-recovery/*training*.json
 *.before-*
 .DS_Store
 Thumbs.db
+# Local compatibility asset snapshots used by an already-running old HTTP server.
+# Canonical tracked sources live under web/dataset-desk/.
+/workflows/dataset_ui.html
+/workflows/training_ui.js
+/workflows/training_ui.css
+# Current-machine calibration copies; tracked reference copies live in config/.
+/SO101 Follower-calibration.json
+/SO101 Leader-calibration.json

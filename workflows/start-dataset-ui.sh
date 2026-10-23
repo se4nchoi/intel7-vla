@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Compatibility WSL entry point.
 set -euo pipefail
-cd "$HOME/lerobot"
-exec .venv/bin/python /mnt/c/Users/user/rjsxo/workflows/dataset_ui.py >> /mnt/c/Users/user/rjsxo/workflows/dataset-ui.log 2>&1
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec bash "$root/scripts/wsl/start-dataset-ui.sh" "$@"

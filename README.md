@@ -13,7 +13,7 @@ SO-101 Leader/Follower로 시연을 수집하고 영상·관절 데이터를 확
 - 로봇 연결, Leader 추종, 녹화·저장·버리기, 연결 해제 제어
 - Rerun 실시간 카메라·관절 시각화
 - Physical AI Studio 실행과 카메라·RGB 인코더 문제 우회 스크립트
-- 학습 환경 준비 자료. 학습 완료 모델과 실제 작업 성공률은 포함하지 않습니다.
+- 학습 탭에서 파라미터 설정·SmolVLA 학습 시작·진행률·loss·체크포인트·로그 확인. 모델 파일 자체와 실제 작업 성공률은 포함하지 않습니다.
 
 **2026-10-23 현재 PC 작업 상태를 공유하는 초기 버전입니다.** PC 경로·USB 시리얼·카메라 이름이 코드에 남아 있으므로 새 PC에서는 [팀원 설치 안내](docs/SETUP.ko.md)에 따라 수정해야 합니다. clone만으로 실행 환경이 복원되지는 않습니다.
 
@@ -31,6 +31,8 @@ SO-101 Leader/Follower USB → usbipd → WSL 직렬 포트
 카메라는 Windows에 두고 로봇 USB만 WSL에 연결합니다. Docker는 LeRobot 경로에 필요하지 않습니다. 현재 카메라명은 `follower_cam` / `field_cam`, DirectShow 장치명은 `icspring camera` / `USB HD`입니다.
 
 ## 설치와 사용
+
+현재 PC의 명령별 실행 예시는 [우리 설정에 맞춘 LeRobot 명령어 안내](docs/LEROBOT-COMMANDS.ko.md)를 참고하세요. 수동 조종·녹화·데이터 조회·편집·BF16 학습·rollout·replay·재보정을 정리했습니다.
 
 1. [팀원 설치 안내](docs/SETUP.ko.md)에 따라 의존성과 장치를 준비합니다.
 2. PC 경로·Python 실행 경로·USB 시리얼·카메라 이름·캘리브레이션을 맞춥니다.
@@ -53,15 +55,19 @@ Dataset Desk: <http://localhost:8877> / Studio: <http://localhost:7860>
 
 | 경로 | 역할 |
 |---|---|
-| `workflows/` | 실행 제어, WSL 준비, Dataset Desk, 녹화·조회·검증 |
-| `camera-bridge/` | 프로젝트용 Windows 카메라 서버 |
-| `lerobot-camera-bridge/` | ZMQ 전달, 카메라 점검, RGB 패치 |
-| `windows_setup/` | WSL·USB·Docker 설치 자료와 보정값 변환 |
-| `patches/` | 실제 WSL LeRobot diff, Studio override 스냅샷 |
-| `recording-encoder-fix/` | Studio RGB 인코더 문제 패치와 검증 |
-| `physical-ai-camera-bridge-share/` | 수업 배포용 단일 카메라 브리지 |
-| `performance-recovery/` | 과거 메모리·성능 조정 참고 문서 |
-| `docs/` | 팀원 설치 안내 |
+| `src/intel7_vla/` | 웹 API·녹화·데이터 편집·학습·Windows 브리지의 실제 구현 |
+| `web/dataset-desk/` | HTML·CSS·JavaScript 화면 원본 |
+| `scripts/windows/` | Windows 준비·카메라·relay·설치 스크립트 |
+| `scripts/wsl/` | Ubuntu 웹 서버·녹화·학습 진입점 |
+| `tests/` | 녹화·편집·학습 API·화면 회귀 검사 |
+| `tools/` | 수동 진단·소스 패치·유지보수 도구 |
+| `config/calibration-examples/` | 현재 실물 장치의 참고 보정값 |
+| `docs/` | 설치·명령어·구조 안내와 과거 준비 기록 |
+| `workflows/`, `training/`, `camera-bridge/`, `lerobot-camera-bridge/` | 기존 경로 호환 진입점과 운영 문서 |
+| `windows_setup/`, `patches/`, `recording-encoder-fix/` | 설치 참고 자료·upstream/Studio 패치 |
+| `physical-ai-camera-bridge-share/`, `performance-recovery/` | 별도 수업 배포본·과거 성능 조정 자료 |
+
+코드를 수정할 위치와 의존 방향은 **[코드 구조 안내](docs/ARCHITECTURE.ko.md)**에 정리했습니다. 기존 더블클릭 실행 파일과 명령 경로는 유지합니다.
 
 세부 운영은 [workflows/README.md](workflows/README.md), 기준 버전은 [patches/README.md](patches/README.md)를 참고하세요. 하위 문서에는 과거 단일 카메라·`redball` 기록도 있습니다. 현재 두 카메라 `messi` 설치는 이 README와 팀원 설치 안내를 우선합니다.
 
@@ -70,7 +76,7 @@ Dataset Desk: <http://localhost:8877> / Studio: <http://localhost:7860>
 - GitHub에는 소스·문서·패치를 올립니다. 가상환경·로그·캐시·임시 ZIP·영상·모델은 제외합니다.
 - 데이터는 WSL `~/.cache/huggingface/lerobot/<owner>/<task>`에 저장되며 Git push로 공유되지 않습니다. 필요하면 별도로 Hugging Face Hub 등에 업로드하고 링크를 공유합니다.
 - 토큰은 각자 로컬에서 인증하고 커밋하지 않습니다. Studio와 WSL CLI 인증은 별개입니다.
-- 루트 `SO101 *-calibration.json`은 현재 실물 장치의 참고 자료입니다. 다른 팔에는 해당 하드웨어의 보정값을 사용해야 합니다.
+- `config/calibration-examples/`의 보정 파일은 현재 실물 장치의 참고 자료입니다. 다른 팔에는 해당 하드웨어의 보정값을 사용해야 합니다.
 
 ## 팀 협업
 
@@ -94,7 +100,7 @@ GitHub에서 PR을 만들고 검토 후 합칩니다. 작업 전 로컬 변경�
 
 ```bash
 cd ~/lerobot
-.venv/bin/python /mnt/c/Users/<사용자>/<저장소폴더>/workflows/check_dataset_ui.py
+.venv/bin/python /mnt/c/Users/<사용자>/<저장소폴더>/tests/check_dataset_ui.py
 ```
 
 실제 USB·모터·카메라·GPU 학습은 각 PC에서 따로 확인해야 합니다.

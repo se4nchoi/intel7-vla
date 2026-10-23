@@ -1,0 +1,55 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LeRobot · Dataset Desk</title>
+<link rel="stylesheet" href="/assets/desk.css"><link rel="stylesheet" href="/assets/training.css">
+<header><h1>◉ LeRobot <span class="muted">/ Dataset Desk</span></h1><small>내 PC에 저장된 작업 기록</small><nav><button id="browseTab" class="active" onclick="tab('browse')">데이터셋</button><button id="recordTab" onclick="tab('record')">카메라 · 녹화</button><button id="trainTab" onclick="tab('train')">학습</button></nav></header>
+<main><section id="browse"><div class="toolbar"><select id="datasets" aria-label="데이터셋" onchange="loadDataset()"></select><button onclick="refresh()">↻ 새로고침</button><button id="restoreEpisode" onclick="window.undoEpisode()" disabled>↶ 최근 삭제 복원</button><span id="editStatus" class="muted" role="status"></span><span id="summary" class="pill">불러오는 중</span><span class="muted" id="pathLabel"></span></div>
+<div class="grid"><aside class="panel"><div class="heading"><span class="section-title">EPISODES</span><span id="count" class="muted"></span></div><div id="episodes"></div></aside><div><div class="toolbar"><strong id="episodeTitle">에피소드를 선택하세요</strong><select id="cameras" aria-label="카메라" onchange="selectEpisode(currentEpisode)"></select><button id="deleteEpisode" class="danger" onclick="window.removeEpisode()" disabled>선택 에피소드 삭제</button><button id="rerun" onclick="openRerun()" disabled>Rerun에서 보기 ↗</button></div><div class="stage"><video id="video" playsinline preload="metadata"></video><img id="fallback" alt="선택한 프레임"><div id="placeholder" class="empty">저장된 영상을 불러옵니다.</div></div>
+<div class="controls"><button id="play" onclick="togglePlay()" disabled>▶ 재생</button><button id="prevFrame" onclick="step(-1)">−1</button><button id="nextFrame" onclick="step(1)">+1</button><input id="scrub" type="range" min="0" max="1" value="0" aria-label="프레임 이동" oninput="seekFrame(+this.value)"><span id="time" class="muted">0 / 0</span><select id="speed" aria-label="재생 속도" onchange="video.playbackRate=+this.value"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></div>
+<div class="panel chart"><div class="section-title">JOINT POSITIONS <span class="muted">· 실제 관절값 / observation.state</span></div><canvas id="chart"></canvas><div class="legend" id="legend"></div></div><p class="hint" id="episodeHint">영상과 관절값을 같은 프레임에서 확인할 수 있습니다. 원본 데이터는 변경하지 않습니다.</p></div></div></section>
+<section id="record"><div class="notice">실행만으로 녹화하거나 Leader를 추종하지 않습니다. <b>로봇 연결 → 자세 확인 → 녹화 시작</b> 순서로 사용하세요. 녹화 중에는 Leader를 추종하고, 저장 후에는 추종을 멈춥니다.</div><div class="record-grid"><div class="panel form"><div class="section-title">RECORDING SETUP</div><label for="recordRepo">데이터셋 ID · 새 작업이면 새 이름</label><input id="recordRepo" value="se4nchoi/messi" placeholder="owner/task"><label for="task">작업 설명</label><input id="task" value="Pick up the red ball, identify the open lane to the left or right of the pickup location, and roll or shoot the ball between the two cones to score a goal."><label for="duration">에피소드 최대 길이 (초)</label><input id="duration" type="number" min="1" max="3600" value="60"><p class="hint">기존 데이터셋이면 이어서 저장합니다.<br>새 이름이면 첫 녹화 때 생성합니다.<br>follower_cam + field_cam · 각 640 × 480 · 30 FPS<br>저장 위치: WSL의 Hugging Face 캐시</p><div class="actions"><button id="connect" class="primary" onclick="connect()">로봇 연결 + Rerun</button><button id="disconnect" onclick="window.sendControl('disconnect')" disabled>연결 해제</button></div><div class="actions"><button id="start" class="primary" onclick="window.sendControl('start',{duration:+$('duration').value})" disabled>● 녹화 시작</button><button id="stop" onclick="window.sendControl('stop')" disabled>■ 중지 · 저장</button></div><div class="actions"><button id="follow" onclick="toggleFollow()" disabled>추종 켜기 (저장 안 함)</button><button id="discard" class="danger" onclick="discard()" disabled>이번 녹화 버리기</button></div><div id="recordMessage" class="muted">로봇 미연결 · 데이터셋을 보는 데에는 연결이 필요하지 않습니다.</div></div><div><div class="toolbar"><strong>실시간 카메라</strong><span id="cameraState" class="pill">확인 중</span><button onclick="reloadCamera()">영상 다시 연결</button></div><div class="live-cameras"><div><p class="hint">GRIPPER · follower_cam <span id="gripperHealth"></span></p><div class="stage"><img id="live" alt="그리퍼 카메라 실시간 영상"></div></div><div><p class="hint">FIELD · field_cam <span id="fieldHealth"></span></p><div class="stage"><img id="liveField" alt="필드 카메라 실시간 영상"></div></div></div><div class="statrow"><div><span class="muted">녹화 상태</span><strong id="recState">대기</strong></div><div><span class="muted">녹화 시간</span><strong id="elapsed">0.0 s</strong></div><div><span class="muted">프레임 / 루프 FPS</span><strong id="frames">0 / 0</strong></div></div><p class="hint">웹캠 → Windows 브리지 → ZMQ → WSL LeRobot. 웹캠을 WSL USB 장치 목록에서 선택할 필요가 없습니다. Rerun은 별도 창에서 실시간 영상·관절값을 표시합니다.</p></div></div><section class="panel log-panel"><div class="heading"><span class="section-title">SESSION LOG <span id="logCount" class="muted">0 lines</span></span><div class="log-tools"><label><input type="checkbox" id="logAutoScroll" checked>Auto-scroll</label><button onclick="copyLogs()">Copy</button><button onclick="clearLogs()">Clear view</button></div></div><div id="sessionLog" role="log" aria-label="Session logs" aria-live="off" tabindex="0"></div><div class="log-note">Live session events · timestamps use your local time · latest 600 lines · clearing this view does not delete saved data</div></section></section><section id="train" style="display:none" aria-labelledby="trainingTitle">
+  <div class="toolbar training-heading"><div><h2 id="trainingTitle">모델 학습</h2><p class="hint">저장된 시연으로 SmolVLA를 미세학습하고 실행 결과를 확인합니다.</p></div><span id="trainingState" class="pill" role="status">상태 확인 중</span><button type="button" onclick="window.trainingUI.refresh()">↻ 새로고침</button></div>
+  <div class="training-layout">
+    <form id="trainingForm" class="panel form">
+      <div class="section-title">새 학습 설정</div>
+      <p class="hint">이 PC의 WSL GPU에서 실행합니다. 데이터와 모델은 로컬에 저장됩니다.</p>
+      <fieldset id="trainingFields">
+        <label for="trainingRepo">학습 데이터셋</label><select id="trainingRepo" required></select>
+        <p id="trainingDatasetInfo" class="hint">저장된 데이터셋을 확인하고 있습니다.</p>
+        <label for="trainingModel">기본 모델</label><select id="trainingModel"><option>SmolVLA · 사전학습 모델</option></select>
+        <div class="training-form-grid">
+          <div><label for="trainingSteps">학습 스텝</label><input id="trainingSteps" type="number" min="10" max="200000" step="1" value="10000" list="trainingStepPresets" required><datalist id="trainingStepPresets"><option value="2000"><option value="10000"><option value="20000"></datalist></div>
+          <div><label for="trainingBatch">배치 크기</label><select id="trainingBatch"><option>1</option><option>2</option><option selected>4</option><option>8</option></select></div>
+          <div><label for="trainingLR">학습률</label><input id="trainingLR" type="number" min="0.0000001" max="0.001" step="any" value="0.0001" required></div>
+          <div><label for="trainingWarmup">Warmup 스텝</label><input id="trainingWarmup" type="number" min="0" max="50000" value="1000" required></div>
+          <div><label for="trainingSplit">검증 에피소드 비율</label><select id="trainingSplit"><option value="0">검증 분리 없음</option><option value="0.1">10%</option><option value="0.2" selected>20%</option><option value="0.3">30%</option><option value="0.4">40%</option></select></div>
+          <div><label for="trainingSave">저장·검증 간격 (스텝)</label><input id="trainingSave" type="number" min="10" max="50000" value="1000" required></div>
+          <div><label for="trainingWorkers">데이터 로더 수</label><select id="trainingWorkers"><option>0</option><option>1</option><option selected>2</option><option>4</option></select></div>
+          <div><label for="trainingSeed">시드</label><input id="trainingSeed" type="number" min="0" max="2147483647" value="1000" required></div>
+        </div>
+        <button id="trainingStart" class="primary" type="submit">학습 시작</button>
+      </fieldset>
+      <p id="trainingStartHint" class="hint" role="status">학습 시작 시 데이터를 별도로 복사합니다. 복사·검증 중에는 녹화·편집을 잠시 멈춰 주세요.</p>
+      <p id="trainingError" class="training-error" role="alert"></p>
+      <p class="hint">복사 완료 후 추가 수집한 에피소드는 다음 학습부터 반영됩니다. 학습과 녹화를 동시에 하면 녹화 FPS를 확인해 주세요.</p>
+    </form>
+    <div class="training-results">
+      <div class="panel training-current">
+        <div class="heading"><span class="section-title">학습 진행 현황</span><span class="hint">5초마다 갱신</span></div>
+        <div class="training-content">
+          <label for="trainingHistory">학습 기록</label><select id="trainingHistory" aria-label="학습 기록"></select>
+          <p id="trainingRunLabel" class="hint">학습 기록을 확인하고 있습니다.</p>
+          <div class="training-progress-label"><strong id="trainingStep">—</strong><span id="trainingPercent" class="muted">0%</span></div>
+          <progress id="trainingProgress" value="0" max="100" aria-label="학습 진행률"></progress>
+          <div class="statrow"><div><span class="muted">학습 loss</span><strong id="trainingLoss">—</strong></div><div><span class="muted">검증 loss</span><strong id="trainingEval">—</strong></div><div><span class="muted">예상 남은 시간</span><strong id="trainingETA">—</strong></div></div>
+          <p id="trainingMessage" class="hint" role="status"></p>
+          <canvas id="trainingChart" aria-label="학습 및 검증 loss 추이" role="img"></canvas>
+          <div class="legend"><span style="color:#a9ec91">● 학습 loss</span><span style="color:#7ec8ef">● 검증 loss</span><span>실제 로봇 성공률은 별도 평가가 필요합니다.</span></div>
+          <details class="training-details"><summary>실행 설정 · 저장 위치</summary><pre id="trainingRunDetails"></pre></details>
+        </div>
+      </div>
+      <div class="panel training-checkpoints"><div class="heading"><span class="section-title">저장된 체크포인트</span><span id="trainingCheckpointCount" class="muted">0개</span></div><div id="trainingCheckpoints" class="training-content hint">아직 저장된 모델이 없습니다.</div></div>
+    </div>
+  </div>
+  <section class="panel log-panel"><div class="heading"><span class="section-title">학습 로그</span><div class="log-tools"><label><input id="trainingAutoScroll" type="checkbox" checked>자동 스크롤</label><button type="button" onclick="window.trainingUI.copyLogs()">복사</button></div></div><pre id="trainingLog" aria-label="학습 로그" tabindex="0">학습 로그를 불러오고 있습니다.</pre><div class="log-note">페이지를 닫아도 학습은 계속됩니다. 최신 로그 일부를 표시합니다.</div></section>
+</section>
+<footer>LOCAL WORKSPACE · Hub 업로드 없음 · 개별 에피소드 삭제 · 원본 백업 보존</footer></main><div id="toast" role="status"></div>
+<script src="/assets/desk.js"></script><script src="/assets/training.js"></script></html>

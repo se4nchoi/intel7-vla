@@ -22,18 +22,18 @@ winget install --id dorssel.usbipd-win -e
 
 | 항목 | 현재 값 | 주요 확인 파일 |
 |---|---|---|
-| Windows 프로젝트 경로 | `C:/Users/user/rjsxo` | `workflows/`, `lerobot-camera-bridge/`의 ps1·sh·py |
+| Windows 프로젝트 경로 | `C:/Users/user/rjsxo` | `src/`, `scripts/`의 실제 구현과 OS 스크립트 |
 | WSL 프로젝트 경로 | `/mnt/c/Users/user/rjsxo` | 같은 파일의 Linux 경로 |
 | WSL 배포판 | `Ubuntu-24.04` | 실행 ps1, USB 자동 연결 |
-| Windows Python | 사용자 홈의 `.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python[w].exe` | `workflows/start.ps1`, `camera-bridge/install.ps1`, `camera-bridge/start-field.ps1`, `lerobot-camera-bridge/start.ps1` |
-| Leader / Follower 시리얼 | `5B90149145` / `5B90150163` | `workflows/start.ps1`, `prepare-wsl.sh`, `recorder.py`, `lerobot-camera-bridge/record.sh` 등 |
-| 카메라 장치명 | `icspring camera` / `USB HD` | `camera-bridge/server.py`, `start-field.ps1` |
+| Windows Python | 사용자 홈의 `.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python[w].exe` | `scripts/windows/start.ps1`, `install-camera-bridge.ps1`, `start-field-camera.ps1`, `start-camera-relay.ps1` |
+| Leader / Follower 시리얼 | `5B90149145` / `5B90150163` | `scripts/windows/start.ps1`, `scripts/wsl/prepare-wsl.sh`, `src/intel7_vla/recording/recorder.py`, `scripts/wsl/record.sh` 등 |
+| 카메라 장치명 | `icspring camera` / `USB HD` | `src/intel7_vla/platforms/windows/camera_server.py`, `scripts/windows/start-field-camera.ps1` |
 | 데이터셋 | `se4nchoi/messi` | Dataset Desk에서 변경, CLI는 해당 스크립트 확인 |
 
 Windows Python은 직접 설치한 Python 경로로 바꾸면 됩니다. Codex 설치는 필요하지 않습니다. 경로 변경 대상을 찾는 PowerShell 예시:
 
 ```powershell
-Get-ChildItem workflows,lerobot-camera-bridge,camera-bridge -Recurse -File -Include *.ps1,*.sh,*.py |
+Get-ChildItem src,scripts -Recurse -File -Include *.ps1,*.sh,*.py |
   Select-String -Pattern 'Users[/\\]user|codex-runtimes|5B90149145|5B90150163'
 ```
 
@@ -125,3 +125,5 @@ cd ~/lerobot
 ```
 
 이 검사는 임시 데이터셋만 사용하여 저장·이어 저장·버리기와 영상 디코딩을 확인합니다. 실제 모터·카메라 연결 또는 학습 성능을 검증하지는 않습니다.
+
+코드 정리 이후 실제 구현·호환 경로·런타임 데이터 경계는 [구조 안내](ARCHITECTURE.ko.md)를 참고하세요. 기존 실행 명령은 호환 진입점으로 유지됩니다.

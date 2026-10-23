@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
+# Compatibility WSL entry point.
 set -euo pipefail
-export PATH="$HOME/.local/bin:$PATH"
-cd "$HOME/lerobot"
-args=()
-if [[ -n "${1:-}" ]]; then args=(--episode "$1"); fi
-exec uv run --no-sync python /mnt/c/Users/user/rjsxo/workflows/view_episodes.py "${args[@]}"
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec bash "$root/scripts/wsl/view-episodes.sh" "$@"
