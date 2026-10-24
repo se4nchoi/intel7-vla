@@ -25,3 +25,13 @@
 - 최신 10,000스텝 학습과 이전 2,000스텝 학습이 완료 상태로 조회되며, 이번 정리에서 새 학습·실제 카메라/모터 검사·웹 서버 재시작은 수행하지 않았습니다.
 
 독립 검사 서버는 검사 후 정상 종료했습니다. 실제 장치 동작과 브라우저 화면의 시각 재검증은 이 구조 정리 검사의 범위에 포함하지 않았습니다.
+
+## 플랫폼별 폴더 재구성 검증 — 2026-10-24
+
+개인 노트북(Windows 11, WSL 배포판 없음)에서 수행했습니다.
+
+- 최상위를 `windows/`, `wsl/`, `studio/`, `tools/`, `docs/`로 재구성하고 호환 진입점(`workflows/`, `camera-bridge/`, `lerobot-camera-bridge/`, `training/`, 루트 probe)을 삭제했습니다.
+- 스크립트의 `C:\Users\user\rjsxo`, `/mnt/c/Users/user/rjsxo` 하드코딩을 자기 위치 기준 경로 계산으로 바꿨습니다. 로그·상태 파일은 `runtime/`(Git 제외)로 모았습니다.
+- Python 52개 파일 구문, `wsl/` 셸 스크립트 `bash -n`, PowerShell 10개 파서 검사 통과.
+- `tests/check_training_ui.cjs`, `tests/check_ui_controls.cjs` 통과. 문서 상대 링크 확인.
+- WSL·LeRobot·실제 장치가 없어 Python 통합 검사(`tests/check_*.py`), 실행 파일 동작, 카메라·모터는 재검증하지 않았습니다.

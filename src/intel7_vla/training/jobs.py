@@ -195,7 +195,7 @@ class TrainingManager:
             write_json(folder/'runtime.json',dict(phase='preparing',message='데이터셋 복사·검증을 준비하고 있습니다.'))
             try:
                 with (folder/'train.log').open('a') as log:
-                    child=subprocess.Popen([str(python),str(PROJECT/'training/run_training_job.py'),str(folder)],
+                    child=subprocess.Popen([str(python),str(PROJECT/'wsl/run_training_job.py'),str(folder)],
                         stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,
                         cwd=self.lerobot,start_new_session=True)
                 data.update(pid=child.pid,start_ticks=process_identity(child.pid))

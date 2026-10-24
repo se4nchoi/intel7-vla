@@ -17,7 +17,7 @@ from urllib.request import urlopen
 from intel7_vla.datasets.editing import revision, undo_available, delete_episode, restore_episode
 from intel7_vla.training.jobs import TrainingManager
 
-from intel7_vla.paths import RUNTIME_ROOT, STATIC_ROOT
+from intel7_vla.paths import PROJECT_ROOT, RUNTIME_ROOT, STATIC_ROOT
 ROOT = RUNTIME_ROOT
 CACHE = Path.home()/'.cache/huggingface/lerobot'
 media_path = next((Path.home()/'.local/share/uv/tools/lelab/lib').glob('python*/site-packages/lelab/episode_media.py'))
@@ -203,7 +203,7 @@ class Handler(BaseHTTPRequestHandler):
                     import subprocess
                     if replay and replay.poll() is None:raise ValueError('앞서 선택한 에피소드를 불러오는 중입니다.')
                     repo=body['repo'];dataset(repo)
-                    replay=subprocess.Popen([sys.executable,str(ROOT/'view_episodes.py'),'--repo-id',repo,
+                    replay=subprocess.Popen([sys.executable,str(PROJECT_ROOT/'src/intel7_vla/datasets/replay.py'),'--repo-id',repo,
                         '--root',str(dataset(repo)),'--episode',str(int(body['episode']))])
                 elif action in ('start','stop','discard','follow','disconnect'):
                     if not worker or not worker.is_alive():raise ValueError('먼저 로봇 연결을 눌러 주세요.')

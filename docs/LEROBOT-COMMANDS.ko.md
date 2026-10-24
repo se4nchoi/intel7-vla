@@ -7,7 +7,7 @@
 PowerShell에서 먼저 준비합니다.
 
 ```powershell
-cd C:\Users\user\rjsxo
+cd C:\Users\<사용자>\intel7-vla
 .\Start-LeRobot.cmd
 ```
 
@@ -25,14 +25,14 @@ Ubuntu에서 한 번 설정합니다.
 cd /home/user/lerobot
 source .venv/bin/activate
 export PATH="$HOME/.local/bin:$PATH"
-PROJECT=/mnt/c/Users/user/rjsxo
+PROJECT=/mnt/c/Users/<사용자>/intel7-vla
 FOLLOWER=/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B90150163-if00
 LEADER=/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B90149145-if00
 DATA=/home/user/.cache/huggingface/lerobot/se4nchoi/messi
 RUN=/home/user/vla-training/runs/messi-smolvla-20261023-143728
 MODEL=/home/user/vla-training/runs/messi-smolvla-20261023-153438-3c5ed1/output/checkpoints/last/pretrained_model
 TASK='Pick up the red ball, identify the open lane to the left or right of the pickup location, and roll or shoot the ball between the two cones to score a goal.'
-GATEWAY=$(python "$PROJECT/workflows/camera_address.py")
+GATEWAY=$(python "$PROJECT/src/intel7_vla/common/camera_address.py")
 CAMERAS="{\"follower_cam\":{\"type\":\"zmq\",\"server_address\":\"$GATEWAY\",\"port\":5555,\"camera_name\":\"follower_cam\",\"width\":640,\"height\":480,\"fps\":30},\"field_cam\":{\"type\":\"zmq\",\"server_address\":\"$GATEWAY\",\"port\":5556,\"camera_name\":\"field_cam\",\"width\":640,\"height\":480,\"fps\":30}}"
 export LEROBOT_RERUN_MEMORY_LIMIT=128MB
 ```
@@ -89,10 +89,10 @@ lerobot-teleoperate \
 
 ```bash
 # 구성·데이터 호환성 검사. 모터 연결이나 녹화를 시작하지 않음.
-bash "$PROJECT/lerobot-camera-bridge/record.sh" --check
+bash "$PROJECT/wsl/record.sh" --check
 
 # 실제 수동 조종과 녹화 시작
-bash "$PROJECT/lerobot-camera-bridge/record.sh"
+bash "$PROJECT/wsl/record.sh"
 ```
 
 이 실행 파일에는 카메라 2대, 두 팔, task, `se4nchoi/messi`, 30fps, Hub 업로드 끄기가 설정돼 있습니다. 기존 데이터가 있으면 이어 저장합니다. 기본값은 에피소드 50개, 회당 60초, reset 60초입니다. 웹 녹화와 동시에 실행하지 마세요.
@@ -101,10 +101,10 @@ bash "$PROJECT/lerobot-camera-bridge/record.sh"
 
 ```bash
 # 최근 저장 완료된 에피소드
-bash "$PROJECT/workflows/view-episodes.sh"
+bash "$PROJECT/wsl/view-episodes.sh"
 
 # 에피소드 0 (번호는 0부터 시작)
-bash "$PROJECT/workflows/view-episodes.sh" 0
+bash "$PROJECT/wsl/view-episodes.sh" 0
 ```
 
 프로젝트 실행 파일은 읽을 수 있는 저장 완료 데이터로 스냅샷을 만들어 Rerun에 표시합니다. 녹화 세션을 정상 저장·종료한 뒤 확인하세요. 이 작업은 로봇을 움직이지 않습니다.
@@ -152,7 +152,7 @@ CLI로 첫 실험과 같은 구성을 새로 학습하려면 아래처럼 실행
 ```bash
 OUT="/home/user/vla-training/manual-messi-$(date +%Y%m%d-%H%M%S)"
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 \
-python "$PROJECT/training/train_bf16.py" \
+python "$PROJECT/wsl/train_bf16.py" \
   --dataset.repo_id=se4nchoi/messi --dataset.root="$RUN/dataset" \
   --dataset.video_backend=pyav --dataset.eval_split=0.2 \
   --policy.path="$RUN/base-two-cameras" \

@@ -1,5 +1,6 @@
 import sys
-sys.path.insert(0,r'C:/Users/user/rjsxo/.camera-tools')
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'.camera-tools'))
 import serial
 from serial.tools import list_ports
 ports=[p for p in list_ports.comports() if p.serial_number=='5B90149145']

@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 import time
-sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'.camera-tools'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'.camera-tools'))
 import serial
 from serial.tools import list_ports
 

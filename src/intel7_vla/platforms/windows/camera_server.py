@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from intel7_vla.paths import PROJECT_ROOT
+from intel7_vla.paths import PROJECT_ROOT, RUNTIME_ROOT
 sys.path.insert(0, str(PROJECT_ROOT / '.camera-tools'))
 import cv2
 import comtypes
@@ -14,7 +14,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-ROOT = PROJECT_ROOT / 'camera-bridge'
+ROOT = RUNTIME_ROOT
 parser = argparse.ArgumentParser()
 parser.add_argument('--camera-name', default='icspring camera')
 parser.add_argument('--name', default='follower_cam')

@@ -83,7 +83,7 @@ def run_job(folder, manager_factory=None):
         config['input_features']={key:dict(type=value.type.value,shape=list(value.shape))
                                   for key,value in features.items() if key!='action'}
         write_json(adapted/'config.json',config)
-        args=[str(manager.lerobot/'.venv/bin/python'),str(PROJECT/'training/train_bf16.py'),
+        args=[str(manager.lerobot/'.venv/bin/python'),str(PROJECT/'wsl/train_bf16.py'),
             f"--dataset.repo_id={options['repo']}",f'--dataset.root={snapshot}',
             '--dataset.video_backend=pyav',f"--dataset.eval_split={options['eval_split']}",
             f'--policy.path={adapted}','--policy.device=cuda','--policy.use_amp=true','--policy.push_to_hub=false',

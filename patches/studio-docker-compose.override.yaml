@@ -1,4 +1,0 @@
-services:
-  physical-ai-studio-cuda:
-    volumes:
-      - /dev:/dev

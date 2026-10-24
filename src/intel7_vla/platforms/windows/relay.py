@@ -8,7 +8,7 @@ import sys
 import time
 import urllib.request
 
-from intel7_vla.paths import PROJECT_ROOT
+from intel7_vla.paths import PROJECT_ROOT, RUNTIME_ROOT
 sys.path.insert(0, str(PROJECT_ROOT / '.camera-tools'))
 import zmq
 
@@ -48,7 +48,7 @@ def main():
     parser.add_argument('--camera-name', default='follower_cam')
     parser.add_argument('--source', default='http://127.0.0.1:8765/camera.mjpg')
     args = parser.parse_args()
-    root = Path(__file__).resolve().parent
+    root = RUNTIME_ROOT
     logging.basicConfig(filename=root / 'relay.log', level=logging.INFO,
                         format='%(asctime)s %(message)s')
     with zmq.Context() as context:

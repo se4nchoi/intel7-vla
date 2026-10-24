@@ -1,5 +1,6 @@
 import sys,time
-sys.path.insert(0,r'C:/Users/user/rjsxo/.camera-tools')
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'.camera-tools'))
 import cv2
 for backend in [cv2.CAP_DSHOW,cv2.CAP_MSMF]:
     cap=cv2.VideoCapture(0,backend)
@@ -15,6 +16,6 @@ for backend in [cv2.CAP_DSHOW,cv2.CAP_MSMF]:
             if ok: good+=1; frame=im
             else: break
         if frame is not None:
-            cv2.imwrite(f'C:/Users/user/rjsxo/camera-windows-{backend}.jpg',frame)
+            cv2.imwrite(str(Path(__file__).resolve().parents[2]/f'runtime/camera-windows-{backend}.jpg'),frame)
             print('NATIVE_FRAMES',good,'SHAPE',frame.shape,flush=True)
     finally: cap.release()

@@ -37,21 +37,12 @@ tmp/
 *.lock
 *.tmp
 *.request
-workflows/last-run.json
-workflows/native-status.json
-lerobot-camera-bridge/check-result.json
-camera-bridge/install-status.json
-camera-bridge/process-id.txt
-camera-bridge/original-*
-performance-recovery/*training*.json
+# Logs, status files, locks and stop requests written by launchers and servers.
+/runtime/
+studio/performance-recovery/*training*.json
 *.before-*
 .DS_Store
 Thumbs.db
-# Local compatibility asset snapshots used by an already-running old HTTP server.
-# Canonical tracked sources live under web/dataset-desk/.
-/workflows/dataset_ui.html
-/workflows/training_ui.js
-/workflows/training_ui.css
 # Current-machine calibration copies; tracked reference copies live in config/.
 /SO101 Follower-calibration.json
 /SO101 Leader-calibration.json
